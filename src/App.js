@@ -8,6 +8,7 @@ function App() {
   const initialURL = "https://pokeapi.co/api/v2/pokemon";
   const [loading, setLoading] = useState(true);
   const [pokemonDate, setPokemonDate] = useState([]);
+  const [nextURL, setNextURL] = useState("");
 
   //ブラウザをリロードした時に呼び出す
   useEffect(() => {
@@ -16,6 +17,7 @@ function App() {
       let res = await getAllPokemon(initialURL);
       // 各ポケモンの詳細なデータを取得
       loadPokemon(res.results);
+      setNextURL(res.next);
       setLoading(false);
     };
     fetchPokemonData();
@@ -25,17 +27,25 @@ function App() {
     // レッスン13 Promise.allの解説
     let _pokemonData = await Promise.all(
       data.map((pokemon) => {
-        // console.log(pokemon);
         let pokemonRecord = getPokemon(pokemon.url);
         return pokemonRecord;
       })
     );
     setPokemonDate(_pokemonData);
-    console.log(pokemonDate);
   };
+
+  const handleNextPage = async () => {
+    setLoading(true);
+    let data = await getAllPokemon(nextURL);
+    await loadPokemon(data.results);
+    setLoading(false);
+  };
+
+  const handlePrevPage = () => {};
+
   return (
     <>
-    <Navbar/>
+      <Navbar />
       <div className="App">
         {loading ? (
           <h1>ロード中✨</h1>
@@ -49,6 +59,10 @@ function App() {
                   </Card>
                 );
               })}
+            </div>
+            <div className="btn">
+              <button onClick={handlePrevPage}>前へ</button>
+              <button onClick={handleNextPage}>次へ</button>
             </div>
           </>
         )}
